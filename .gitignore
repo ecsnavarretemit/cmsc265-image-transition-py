@@ -109,4 +109,7 @@ data
 _scripts
 sarai-maps-api.wsgi
 
+# sample images
+assets/*
+
 
