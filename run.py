@@ -10,8 +10,6 @@ import os
 import cv2
 import dlib
 import numpy as np
-# import glob
-# from app.image import validate_dimensions
 
 ASSETS_PATH = os.path.join(os.getcwd(), "assets/img")
 PREDICTOR_PATH = os.path.join(os.getcwd(), "data/shape-predictor/shape_predictor_68_face_landmarks.dat")
@@ -39,11 +37,29 @@ def get_landmarks(im):
   # dereference list elements into separate variables
   x, y, w, h = rects[0]
 
+  # get the image width and height
+  height, width, _ = im.shape
+
   # convert all parameters to int doing so will prevent errors with incompatibility with boost-python
   rect = dlib.rectangle(int(x), int(y), int(x + w), int(y + h))
 
+  # create 2 dimensional array for the matrix
+  items = []
+  for p in predictor(im, rect).parts():
+    items.append([p.x, p.y])
+
+  # append the edges and the halfway point from the edges
+  items.append([0, 0])
+  items.append([0, int(height / 2)])
+  items.append((0, int(height - 1)))
+  items.append([int(width / 2), 0])
+  items.append([int(width - 1), 0])
+  items.append((int(width - 1), int(height - 1)))
+  items.append((int(width / 2), int(height - 1)))
+  items.append((int(width - 1), int(height / 2)))
+
   # return a new numpy matrix
-  return np.matrix([[p.x, p.y] for p in predictor(im, rect).parts()])
+  return np.matrix(items)
 
 def get_points(landmarks):
   points = []
