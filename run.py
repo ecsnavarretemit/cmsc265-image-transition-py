@@ -45,9 +45,7 @@ def get_landmarks(im):
   # return a new numpy matrix
   return np.matrix([[p.x, p.y] for p in predictor(im, rect).parts()])
 
-def get_points(im, landmarks):
-  # clone the image instance to preserve the original instance
-  im = im.copy()
+def get_points(landmarks):
   points = []
 
   for _, point in enumerate(landmarks):
@@ -57,14 +55,13 @@ def get_points(im, landmarks):
 
   return points
 
-def draw_triangles(im, landmarks):
-  # clone the image instance to preserve the original instance
-  im = im.copy()
+def get_triangles(im, points):
   size = im.shape
   rect = (0, 0, size[1], size[0])
 
+  triangles = []
+
   subdiv = cv2.Subdiv2D(rect)
-  points = get_points(im, landmarks)
 
   for _, point in enumerate(points):
     subdiv.insert(point)
@@ -77,9 +74,20 @@ def draw_triangles(im, landmarks):
     point3 = (triangle[4], triangle[5])
 
     if rect_contains(rect, point1) and rect_contains(rect, point2) and rect_contains(rect, point3):
-      cv2.line(im, point1, point2, (255, 255, 255), 1, cv2.LINE_AA, 0)
-      cv2.line(im, point2, point3, (255, 255, 255), 1, cv2.LINE_AA, 0)
-      cv2.line(im, point3, point1, (255, 255, 255), 1, cv2.LINE_AA, 0)
+      triangles.append((point1, point2, point3))
+
+  return triangles
+
+def draw_triangles(im, landmarks):
+  # clone the image instance to preserve the original instance
+  im = im.copy()
+
+  triangles = get_triangles(im, get_points(landmarks))
+
+  for point1, point2, point3 in triangles:
+    cv2.line(im, point1, point2, (255, 255, 255), 1, cv2.LINE_AA, 0)
+    cv2.line(im, point2, point3, (255, 255, 255), 1, cv2.LINE_AA, 0)
+    cv2.line(im, point3, point1, (255, 255, 255), 1, cv2.LINE_AA, 0)
 
   return im
 
