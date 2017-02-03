@@ -55,15 +55,12 @@ def get_points(landmarks):
 
   return points
 
-def get_triangles(im, points):
-  size = im.shape
-  rect = (0, 0, size[1], size[0])
-
+def get_triangles(rect, points):
   triangles = []
 
   subdiv = cv2.Subdiv2D(rect)
 
-  for _, point in enumerate(points):
+  for point in points:
     subdiv.insert(point)
 
   triangle_list = subdiv.getTriangleList()
@@ -82,13 +79,20 @@ def draw_triangles(im, landmarks):
   # clone the image instance to preserve the original instance
   im = im.copy()
 
-  triangles = get_triangles(im, get_points(landmarks))
+  # assemble the rectangle
+  size = im.shape
+  rect = (0, 0, size[1], size[0])
 
+  # get the coordinates of the points of all triangles in the picture
+  triangles = get_triangles(rect, get_points(landmarks))
+
+  # draw lines between the three points to form a rectangle
   for point1, point2, point3 in triangles:
     cv2.line(im, point1, point2, (255, 255, 255), 1, cv2.LINE_AA, 0)
     cv2.line(im, point2, point3, (255, 255, 255), 1, cv2.LINE_AA, 0)
     cv2.line(im, point3, point1, (255, 255, 255), 1, cv2.LINE_AA, 0)
 
+  # return the manipulated image
   return im
 
 if __name__ == '__main__':
