@@ -8,7 +8,8 @@
 
 import os
 import click
-from app.image_manipulator import create_sequence, NoImagesExeption
+from app.image_manipulator import create_sequence
+from app.image_manipulator.exceptions import NoImagesExeption
 
 @click.command()
 @click.option('--source-imgs-path', default="assets/img", help='Source directory containing the images', type=click.Path())

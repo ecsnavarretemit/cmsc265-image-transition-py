@@ -25,6 +25,10 @@ def get_dlib_predictor():
     return predictor
 
   predictor_path = os.environ.get('PREDICTOR_PATH', DEFAULT_PREDICTOR_PATH)
+
+  if not os.path.exists(predictor_path) or not os.path.isfile(predictor_path):
+    pass
+
   predictor = dlib.shape_predictor(predictor_path)
 
   return predictor
@@ -37,6 +41,10 @@ def get_opencv_cascade():
     return cascade
 
   cascade_path = os.environ.get('CASCADE_PATH', DEFAULT_CASCADE_PATH)
+
+  if not os.path.exists(cascade_path) or not os.path.isfile(cascade_path):
+    pass
+
   cascade = cv2.CascadeClassifier(cascade_path)
 
   return cascade
