@@ -33,21 +33,21 @@ def rect_contains(rect, point):
 
   return True
 
-def get_landmarks(im):
-  rects = cascade.detectMultiScale(im, 1.3, 5)
+def get_landmarks(img):
+  rects = cascade.detectMultiScale(img, 1.3, 5)
 
   # dereference list elements into separate variables
   x, y, w, h = rects[0]
 
   # get the image width and height
-  height, width, _ = im.shape
+  height, width, _ = img.shape
 
   # convert all parameters to int doing so will prevent errors with incompatibility with boost-python
   rect = dlib.rectangle(int(x), int(y), int(x + w), int(y + h))
 
   # create 2 dimensional array for the matrix
   items = []
-  for p in predictor(im, rect).parts():
+  for p in predictor(img, rect).parts():
     items.append([p.x, p.y])
 
   x_start_point = 0
@@ -182,12 +182,12 @@ def calculate_delaunay_triangles(rect, points):
 
   return delaunay_triangles
 
-def draw_triangles(im, landmarks):
+def draw_triangles(img, landmarks):
   # clone the image instance to preserve the original instance
-  im = im.copy()
+  img = img.copy()
 
   # get the image width and height
-  height, width, _ = img1.shape
+  height, width, _ = img.shape
 
   # assemble the rectangle
   rect = (0, 0, height, width)
@@ -197,12 +197,12 @@ def draw_triangles(im, landmarks):
 
   # draw lines between the three points to form a rectangle
   for point1, point2, point3 in triangles:
-    cv2.line(im, point1, point2, (255, 255, 255), 1, cv2.LINE_AA, 0)
-    cv2.line(im, point2, point3, (255, 255, 255), 1, cv2.LINE_AA, 0)
-    cv2.line(im, point3, point1, (255, 255, 255), 1, cv2.LINE_AA, 0)
+    cv2.line(img, point1, point2, (255, 255, 255), 1, cv2.LINE_AA, 0)
+    cv2.line(img, point2, point3, (255, 255, 255), 1, cv2.LINE_AA, 0)
+    cv2.line(img, point3, point1, (255, 255, 255), 1, cv2.LINE_AA, 0)
 
   # return the manipulated image
-  return im
+  return img
 
 if __name__ == '__main__':
   # get all jpg image using a glob
