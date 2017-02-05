@@ -11,8 +11,8 @@ import click
 from app.image_manipulator import create_sequence, NoImagesExeption
 
 @click.command()
-@click.option('--source-imgs-path', default="assets/img", help='Source directory containing the images')
-@click.option('--output-path', default="out", help='Output directory to place the generated images')
+@click.option('--source-imgs-path', default="assets/img", help='Source directory containing the images', type=click.Path())
+@click.option('--output-path', default="out", help='Output directory to place the generated images', type=click.Path())
 @click.option('--output-extension', default="jpg", help='File extension of the generated images')
 @click.option('--sequence-prefix', default="seq-", help='Prefix of the image sequences e.g. seq-')
 @click.option('--extension', default=['jpg'], multiple=True)
