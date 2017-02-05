@@ -7,11 +7,13 @@
 # Version 1.0.0-alpha1
 
 import os
+import glob
 import cv2
 import dlib
 import numpy as np
 
-ASSETS_PATH = os.path.join(os.getcwd(), "assets/img-large")
+ASSETS_PATH = os.path.join(os.getcwd(), "assets/img")
+OUTPUT_PATH = os.path.join(os.getcwd(), "out")
 PREDICTOR_PATH = os.path.join(os.getcwd(), "data/shape-predictor/shape_predictor_68_face_landmarks.dat")
 CASCADE_PATH = os.path.join(os.getcwd(), "data/opencv-cascades/haarcascades/haarcascade_frontalface_default.xml")
 
@@ -203,55 +205,72 @@ def draw_triangles(im, landmarks):
   return im
 
 if __name__ == '__main__':
-  img1 = cv2.imread(ASSETS_PATH + '/img-1.jpg')
-  img2 = cv2.imread(ASSETS_PATH + '/img-3.jpg')
-  img3 = cv2.imread(ASSETS_PATH + '/img-3.jpg')
-  img4 = cv2.imread(ASSETS_PATH + '/img-4.jpg')
-  img5 = cv2.imread(ASSETS_PATH + '/img-5.jpg')
-  img6 = cv2.imread(ASSETS_PATH + '/img-6.jpg')
+  # get all jpg image using a glob
+  images = glob.glob(ASSETS_PATH + '/*.jpg')
 
-  points1 = get_points(get_landmarks(img1))
-  points2 = get_points(get_landmarks(img2))
-  points3 = get_points(get_landmarks(img3))
-  points4 = get_points(get_landmarks(img4))
-  points5 = get_points(get_landmarks(img5))
-  points6 = get_points(get_landmarks(img6))
+  # execution variables
+  num_images = len(images)
+  num_exec = num_images - 1
+  num_images_per_exec = 2
+  num_iterations = 10
 
-  # get the image width and height
-  height, width, _ = img1.shape
+  # convert images list to cv image instances list
+  cv_img_instances = list(map(cv2.imread, images))
 
-  # Compute weighted average point coordinates
-  points = []
-  alpha = 0.3 # this should be animated
-  for i in range(0, len(points1)):
-    x = (1 - alpha) * points1[i][0] + alpha * points2[i][0]
-    y = (1 - alpha) * points1[i][1] + alpha * points2[i][1]
+  # check if the output path exists, if not create it
+  if not os.path.exists(OUTPUT_PATH):
+    os.mkdir(OUTPUT_PATH)
 
-    points.append((x, y))
+  img_ctr = 0
+  for i in range(0, num_exec):
+    img_set = cv_img_instances[i:num_images_per_exec + i]
 
-  # Delaunay triangulation
-  rect = (0, 0, width, height)
-  dt = calculate_delaunay_triangles(rect, points)
+    # loop inclusive of the last number depending on the value of num_iterations
+    for j in range(0, num_iterations + 1):
+      # calculate the alpha (opacity) of the interweaved images
+      alpha = j / num_iterations
 
-  # Allocate space for final output
-  morphed_image = np.zeros(img1.shape, dtype=img1.dtype)
+      # get the facial landmarks. after that get the points in the image
+      # with the corresponding landmarks including the image borders
+      points1 = get_points(get_landmarks(img_set[0]))
+      points2 = get_points(get_landmarks(img_set[1]))
 
-  for i in dt:
-    x, y, z = i
+      # get the image width and height
+      height, width, _ = img_set[0].shape
 
-    x = int(x)
-    y = int(y)
-    z = int(z)
+      # Compute weighted average point coordinates
+      points = []
+      for i in range(0, len(points1)):
+        x = (1 - alpha) * points1[i][0] + alpha * points2[i][0]
+        y = (1 - alpha) * points1[i][1] + alpha * points2[i][1]
 
-    t1 = [points1[x], points1[y], points1[z]]
-    t2 = [points2[x], points2[y], points2[z]]
-    t = [points[x], points[y], points[z]]
+        points.append((x, y))
 
-    # Morph one triangle at a time.
-    morph_triangle(img1, img2, morphed_image, t1, t2, t, alpha)
+      # Delaunay triangulation
+      rect = (0, 0, width, height)
+      triangles = calculate_delaunay_triangles(rect, points)
 
-  # Display Result
-  cv2.imshow("Morphed Face", np.uint8(morphed_image))
-  cv2.waitKey(0)
+      # Allocate space for final output
+      morphed_image = np.zeros(img_set[0].shape, dtype=img_set[0].dtype)
+
+      for triangle in triangles:
+        x, y, z = triangle
+
+        x = int(x)
+        y = int(y)
+        z = int(z)
+
+        t1 = [points1[x], points1[y], points1[z]]
+        t2 = [points2[x], points2[y], points2[z]]
+        t = [points[x], points[y], points[z]]
+
+        # Morph one triangle at a time.
+        morph_triangle(img_set[0], img_set[1], morphed_image, t1, t2, t, alpha)
+
+      # increment the image counter
+      img_ctr += 1
+
+      # write the image to the file system
+      cv2.imwrite(OUTPUT_PATH + "/seq-" + str(img_ctr).zfill(3) + ".jpg", morphed_image)
 
 
