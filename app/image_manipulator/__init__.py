@@ -12,6 +12,15 @@ import numpy as np
 from app.image_manipulator.coords import get_points, get_landmarks
 from app.image_manipulator.triangles import calculate_delaunay_triangles, morph_triangle
 
+# create custom exception
+class NoImagesExeption(Exception):
+  def __init__(self, msg):
+    # call the parent class init function
+    Exception.__init__(self, msg)
+
+    # save the message of the exception
+    self.msg = msg
+
 def create_sequence(source_directory, output_directory, **kwargs):
   detected_extensions = kwargs.get('extensions', ['jpg', 'png'])
   output_extension = kwargs.get('output_extension', 'jpg')
@@ -22,8 +31,7 @@ def create_sequence(source_directory, output_directory, **kwargs):
 
   # terminate if no images are found
   if len(images) == 0:
-    sys.stdout.write("No images in the source directory: %s\n" % source_directory)
-    sys.exit(1)
+    raise NoImagesExeption("No images in the source directory: %s" % source_directory)
 
   # execution variables
   num_images = len(images)
