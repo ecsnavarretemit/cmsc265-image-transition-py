@@ -8,12 +8,57 @@ import os
 import cv2
 import dlib
 import numpy as np
+from app.image_manipulator.exceptions import InvalidDlibPredictorException, InvalidOpenCVCascadeException
 
-PREDICTOR_PATH = os.path.join(os.getcwd(), "data/shape-predictor/shape_predictor_68_face_landmarks.dat")
-CASCADE_PATH = os.path.join(os.getcwd(), "data/opencv-cascades/haarcascades/haarcascade_frontalface_default.xml")
+# OpenCV and DLib cascade and predictor paths
+cwd = os.getcwd()
+DEFAULT_PREDICTOR_PATH = os.path.join(cwd, "data/shape-predictor/shape_predictor_68_face_landmarks.dat")
+DEFAULT_CASCADE_PATH = os.path.join(cwd, "data/opencv-cascades/haarcascades/haarcascade_frontalface_default.xml")
 
-predictor = dlib.shape_predictor(PREDICTOR_PATH)
-cascade = cv2.CascadeClassifier(CASCADE_PATH)
+predictor = None
+cascade = None
+
+def get_dlib_predictor():
+  global predictor
+
+  # return the resolved predictor if it is not None
+  if predictor is not None:
+    return predictor
+
+  predictor_path = os.environ.get('PREDICTOR_PATH', DEFAULT_PREDICTOR_PATH)
+
+  # show error if the predictor file does not exist
+  if not os.path.exists(predictor_path):
+    raise InvalidDlibPredictorException("Dlib Shape Predictor file does not exist on this path: %s" % predictor_path)
+
+  # show error if the predictor file is not a valid file
+  if not os.path.isfile(predictor_path):
+    raise InvalidDlibPredictorException("Dlib Shape Predictor is not a file: %s" % predictor_path)
+
+  predictor = dlib.shape_predictor(predictor_path)
+
+  return predictor
+
+def get_opencv_cascade():
+  global cascade
+
+  # return the resolved cascade if it is not None
+  if cascade is not None:
+    return cascade
+
+  cascade_path = os.environ.get('CASCADE_PATH', DEFAULT_CASCADE_PATH)
+
+  # show error if the opencv cascade file does not exist
+  if not os.path.exists(cascade_path):
+    raise InvalidDlibPredictorException("OpenCV cascade file does not exist on this path: %s" % cascade_path)
+
+  # show error if the opencv cascade is not a valid file
+  if not os.path.isfile(cascade_path):
+    raise InvalidDlibPredictorException("OpenCV cascade is not a file: %s" % cascade_path)
+
+  cascade = cv2.CascadeClassifier(cascade_path)
+
+  return cascade
 
 # Check if a point is inside a rectangle
 def rect_contains(rect, point):
@@ -29,7 +74,7 @@ def rect_contains(rect, point):
   return True
 
 def get_landmarks(img):
-  rects = cascade.detectMultiScale(img, 1.3, 5)
+  rects = get_opencv_cascade().detectMultiScale(img, 1.3, 5)
 
   # dereference list elements into separate variables
   x, y, w, h = rects[0]
@@ -42,7 +87,7 @@ def get_landmarks(img):
 
   # create 2 dimensional array for the matrix
   items = []
-  for p in predictor(img, rect).parts():
+  for p in get_dlib_predictor()(img, rect).parts():
     items.append([p.x, p.y])
 
   x_start_point = 0

@@ -9,17 +9,9 @@ import sys
 import glob
 import cv2
 import numpy as np
+from app.image_manipulator.exceptions import NoImagesExeption
 from app.image_manipulator.coords import get_points, get_landmarks
 from app.image_manipulator.triangles import calculate_delaunay_triangles, morph_triangle
-
-# create custom exception
-class NoImagesExeption(Exception):
-  def __init__(self, msg):
-    # call the parent class init function
-    Exception.__init__(self, msg)
-
-    # save the message of the exception
-    self.msg = msg
 
 def create_sequence(source_directory, output_directory, **kwargs):
   detected_extensions = kwargs.get('extensions', ['jpg', 'png'])
