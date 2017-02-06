@@ -58,6 +58,24 @@ def create_sequence(source_directory, output_directory, **kwargs):
 
     # loop inclusive of the last number depending on the value of num_iterations
     for j in range(0, num_iterations + 1):
+      # increment the image counter
+      img_ctr += 1
+
+      # resolve the filename and the path
+      image_output_path = output_directory + "/" + sequence_prefix + str(img_ctr).zfill(3) + "." + output_extension
+
+      # skip first image to prevent costly computing and just write it immediately
+      if j == 0:
+        # write the image to the file system
+        cv2.imwrite(image_output_path, img_set[0])
+        continue
+
+      # skip last image to prevent costly computing and just write it immediately
+      if j == (num_iterations + 1) - 1:
+        # write the image to the file system
+        cv2.imwrite(image_output_path, img_set[1])
+        continue
+
       # calculate the alpha (opacity) of the interweaved images
       alpha = j / num_iterations
 
@@ -90,12 +108,6 @@ def create_sequence(source_directory, output_directory, **kwargs):
 
         # Morph one triangle at a time.
         morph_triangle(img_set[0], img_set[1], morphed_image, t1, t2, t, alpha)
-
-      # increment the image counter
-      img_ctr += 1
-
-      # resolve the filename and the path
-      image_output_path = output_directory + "/" + sequence_prefix + str(img_ctr).zfill(3) + "." + output_extension
 
       # write the image to the file system
       cv2.imwrite(image_output_path, morphed_image)
