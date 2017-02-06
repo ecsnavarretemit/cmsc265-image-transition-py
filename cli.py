@@ -9,7 +9,8 @@
 import os
 import click
 from app.image_manipulator import create_sequence
-from app.image_manipulator.exceptions import NoImagesExeption
+from app.image_manipulator.exceptions import NoImagesExeption, \
+  InvalidDlibPredictorException, InvalidOpenCVCascadeException
 
 @click.command()
 @click.option('--source-imgs-path', default="assets/img", help='Source directory containing the images', type=click.Path())
@@ -41,9 +42,9 @@ def create(source_imgs_path, output_path, output_extension, sequence_prefix, ext
                     output_extension=output_extension,
                     sequence_prefix=sequence_prefix)
 
-  except NoImagesExeption as err:
+  except (NoImagesExeption, InvalidDlibPredictorException, InvalidOpenCVCascadeException) as err:
     # show the error message
-    click.echo(err.msg)
+    click.echo("Error - %s" % err.msg)
 
 if __name__ == '__main__':
   create()

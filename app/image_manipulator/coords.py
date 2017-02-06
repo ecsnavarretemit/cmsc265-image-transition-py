@@ -8,6 +8,7 @@ import os
 import cv2
 import dlib
 import numpy as np
+from app.image_manipulator.exceptions import InvalidDlibPredictorException, InvalidOpenCVCascadeException
 
 # OpenCV and DLib cascade and predictor paths
 cwd = os.getcwd()
@@ -26,8 +27,13 @@ def get_dlib_predictor():
 
   predictor_path = os.environ.get('PREDICTOR_PATH', DEFAULT_PREDICTOR_PATH)
 
-  if not os.path.exists(predictor_path) or not os.path.isfile(predictor_path):
-    pass
+  # show error if the predictor file does not exist
+  if not os.path.exists(predictor_path):
+    raise InvalidDlibPredictorException("Dlib Shape Predictor file does not exist on this path: %s" % predictor_path)
+
+  # show error if the predictor file is not a valid file
+  if not os.path.isfile(predictor_path):
+    raise InvalidDlibPredictorException("Dlib Shape Predictor is not a file: %s" % predictor_path)
 
   predictor = dlib.shape_predictor(predictor_path)
 
@@ -42,8 +48,13 @@ def get_opencv_cascade():
 
   cascade_path = os.environ.get('CASCADE_PATH', DEFAULT_CASCADE_PATH)
 
-  if not os.path.exists(cascade_path) or not os.path.isfile(cascade_path):
-    pass
+  # show error if the opencv cascade file does not exist
+  if not os.path.exists(cascade_path):
+    raise InvalidDlibPredictorException("OpenCV cascade file does not exist on this path: %s" % cascade_path)
+
+  # show error if the opencv cascade is not a valid file
+  if not os.path.isfile(cascade_path):
+    raise InvalidDlibPredictorException("OpenCV cascade is not a file: %s" % cascade_path)
 
   cascade = cv2.CascadeClassifier(cascade_path)
 

@@ -8,7 +8,8 @@
 
 import os
 from app.image_manipulator import create_sequence
-from app.image_manipulator.exceptions import NoImagesExeption
+from app.image_manipulator.exceptions import NoImagesExeption, \
+  InvalidDlibPredictorException, InvalidOpenCVCascadeException
 
 ASSETS_PATH = os.path.join(os.getcwd(), "assets/img")
 OUTPUT_PATH = os.path.join(os.getcwd(), "out")
@@ -16,7 +17,7 @@ OUTPUT_PATH = os.path.join(os.getcwd(), "out")
 if __name__ == '__main__':
   try:
     create_sequence(ASSETS_PATH, OUTPUT_PATH, extensions=['jpg'])
-  except NoImagesExeption as err:
+  except (NoImagesExeption, InvalidDlibPredictorException, InvalidOpenCVCascadeException) as err:
     print(err.msg)
 
 
