@@ -30,6 +30,11 @@ Follow these steps to install the setup the application:
 
     2. `<python version>`: is the version under your `venv` virtual environment folder
 
+5. Create `data` folder using the command `mkdir data`
+6. Create a symlink/copy of `haarcascades` folder of OpenCV to `data/opencv-cascades/haarcascades`
+7. Download shape predictor file from [this link](http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2).
+8. Place and extract the shape predictor file to `data/shape-predictor`
+
 ## Running the Program
 
 This program can be run using the command `./run.py`.
