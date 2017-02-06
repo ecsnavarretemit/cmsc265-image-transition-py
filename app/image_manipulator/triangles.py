@@ -85,7 +85,6 @@ def calculate_delaunay_triangles(rect, points):
 
   delaunay_triangles = []
   pt = []
-  count = 0
 
   for triangle in triangles:
     point1, point2, point3 = triangle
@@ -94,7 +93,6 @@ def calculate_delaunay_triangles(rect, points):
     pt.append(point2)
     pt.append(point3)
 
-    count = count + 1
     ind = []
 
     for j in range(0, 3):
